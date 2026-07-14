@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environments
+.venv/
+venv/
+
+# VS Code
+.vscode/
+
+# Build artifacts
+build/
+dist/
+
+# Generated files
+output/
+*.pdf
+*.svg
+*.png
+*.log
+*.tmp
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# KiCad backups
+*-bak
+*.kicad_prl
+*.kicad_pro-bak
