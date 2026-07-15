@@ -1,76 +1,68 @@
 """
 DraftGen Diagnostics
-
-Usage:
-
-Inside KiCad:
-    python diagnostics.py
-
-Outside KiCad:
-    python diagnostics.py "C:\\Projects\\MyBoard\\MyBoard.kicad_pcb"
 """
 
 import sys
 import platform
+import importlib
 import pcbnew
+
+PROJECT_ROOT = r"C:\Projects\DraftGen"
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+import draftgen.board
+import draftgen.kicad_io
+
+# Force reload during development
+importlib.reload(draftgen.board)
+importlib.reload(draftgen.kicad_io)
+
+from draftgen.kicad_io import load_board_data
 
 
 def separator():
     print("=" * 60)
 
 
-def get_board():
-    """
-    Returns a BOARD object.
+separator()
+print("DraftGen Diagnostics")
+separator()
 
-    Priority:
-        1. Load board from command-line argument
-        2. Use currently opened board (Plugin/Console)
-    """
+print("KiCad Version :", pcbnew.Version())
+print("Python        :", sys.version.split()[0])
+print("Platform      :", platform.system())
+print()
 
-    # Command line mode
-    if len(sys.argv) == 2:
-        filename = sys.argv[1]
-        print(f"Loading board from:\n{filename}\n")
-        return pcbnew.LoadBoard(filename)
+board = load_board_data()
 
-    # KiCad Plugin / KiPython mode
-    return pcbnew.GetBoard()
+print("Project")
+print("-" * 30)
+print("Name           :", board.project_name)
+print("File           :", board.filename)
+print()
 
+print("Board")
+print("-" * 30)
+print(f"Width          : {board.width:.2f} mm")
+print(f"Height         : {board.height:.2f} mm")
+print(f"Thickness      : {board.board_thickness:.2f} mm")
+print()
 
-def main():
+print("Layers")
+print("-" * 30)
+print("Copper Layers  :", board.copper_layers)
+print()
 
-    separator()
-    print("DraftGen Diagnostics")
-    separator()
+print("Objects")
+print("-" * 30)
+print("Footprints     :", board.footprint_count)
+print("Tracks         :", board.track_count)
+print("Vias           :", board.via_count)
+print("Zones          :", board.zone_count)
+print()
 
-    print(f"KiCad Version : {pcbnew.Version()}")
-    print(f"Python        : {sys.version.split()[0]}")
-    print(f"Platform      : {platform.system()}")
-
-    print()
-
-    board = get_board()
-
-    if board is None:
-        print("ERROR: No board available.")
-        print()
-        print("Run one of the following:")
-        print()
-        print("1. Inside KiCad (Plugin / KiPython)")
-        print("2. diagnostics.py <board.kicad_pcb>")
-        return
-
-    print("Board Loaded Successfully")
-    print()
-
-    print(f"Project File  : {board.GetFileName()}")
-    print(f"Copper Layers : {board.GetCopperLayerCount()}")
-
-    separator()
-    print("STATUS : READY")
-    separator()
-
-
-if __name__ == "__main__":
-    main()
+separator()
+print("STATUS : READY")
+separator()
