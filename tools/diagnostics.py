@@ -27,14 +27,19 @@ import draftgen.board
 import draftgen.kicad_io
 import draftgen.geometry
 import draftgen.geometry_io
+import draftgen.footprint
+import draftgen.footprint_io
 
 importlib.reload(draftgen.board)
 importlib.reload(draftgen.kicad_io)
 importlib.reload(draftgen.geometry)
 importlib.reload(draftgen.geometry_io)
+importlib.reload(draftgen.footprint)
+importlib.reload(draftgen.footprint_io)
 
 from draftgen.kicad_io import load_board_data
 from draftgen.geometry_io import load_geometry
+from draftgen.footprint_io import load_footprints
 
 
 def separator():
@@ -97,10 +102,6 @@ print("Rectangles     :", geometry.rectangle_count)
 print("Polygons       :", geometry.polygon_count)
 print()
 
-# ----------------------------------------------------------
-# Rectangle Details
-# ----------------------------------------------------------
-
 if geometry.rectangles:
 
     print("Rectangle Details")
@@ -116,64 +117,125 @@ if geometry.rectangles:
         print()
 
 # ----------------------------------------------------------
-# Line Details
+# Footprints
 # ----------------------------------------------------------
 
-if geometry.lines:
+footprints = load_footprints()
 
-    print("Line Details")
-    print("-" * 30)
+print("Footprints")
+print("-" * 30)
+print("Total          :", len(footprints))
+print()
 
-    for i, line in enumerate(geometry.lines, start=1):
+for fp in footprints[:10]:
 
-        print(f"Line #{i}")
-        print(
-            f"Start          : ({line.start.x:.2f}, {line.start.y:.2f}) mm"
-        )
-        print(
-            f"End            : ({line.end.x:.2f}, {line.end.y:.2f}) mm"
-        )
-        print()
+    print("Reference      :", fp.reference)
+    print("Value          :", fp.value)
+    print("UUID           :", fp.uuid)
+    print()
+
+    print("Library")
+    print("--------------")
+    print("Library        :", fp.library)
+    print("Footprint      :", fp.footprint)
+    print("Description    :", fp.library_description)
+    print("Keywords       :", fp.keywords)
+    print()
+
+    print("Placement")
+    print("--------------")
+    print(f"Position       : ({fp.x:.2f}, {fp.y:.2f}) mm")
+    print(f"Rotation       : {fp.rotation:.2f}°")
+    print("Side           :", fp.side)
+    print("Locked         :", fp.locked)
+    print()
+
+    print("Manufacturing")
+    print("--------------")
+    print("Pad Count      :", fp.pad_count)
+    print("SMD            :", fp.smd)
+    print("Through Hole   :", fp.through_hole)
+    print("DNP            :", fp.dnp)
+    print("Exclude BOM    :", fp.exclude_bom)
+    print("Exclude POS    :", fp.exclude_pos)
+    print()
+
+    print("Bounding Box")
+    print("--------------")
+    print(f"Origin         : ({fp.bounding_x:.2f}, {fp.bounding_y:.2f}) mm")
+    print(f"Width          : {fp.width:.2f} mm")
+    print(f"Height         : {fp.height:.2f} mm")
+    print()
+
+    print("Schematic")
+    print("--------------")
+    print("Sheet Name     :", fp.sheet_name)
+    print("Sheet File     :", fp.sheet_file)
+    print()
+
+    print("Documentation")
+    print("--------------")
+    print("Datasheet      :", fp.datasheet)
+    print("Description    :", fp.description)
+    print()
+
+    print("Fields")
+    print("--------------")
+
+    if fp.fields:
+
+        for name, value in fp.fields.items():
+            print(f"{name:<20}: {value}")
+
+    else:
+        print("None")
+
+    print()
+    print("-" * 60)
 
 # ----------------------------------------------------------
-# Circle Details
+# DNP Validation
 # ----------------------------------------------------------
 
-if geometry.circles:
+print()
+print("DNP Components")
+print("-" * 30)
 
-    print("Circle Details")
-    print("-" * 30)
+dnp_parts = [fp for fp in footprints if fp.dnp]
 
-    for i, circle in enumerate(geometry.circles, start=1):
+if not dnp_parts:
 
-        print(f"Circle #{i}")
-        print(
-            f"Center         : ({circle.center.x:.2f}, {circle.center.y:.2f}) mm"
-        )
-        print(f"Radius         : {circle.radius:.2f} mm")
-        print()
+    print("No DNP components found.")
 
-# ----------------------------------------------------------
-# Arc Details
-# ----------------------------------------------------------
+else:
 
-if geometry.arcs:
+    for fp in dnp_parts:
 
-    print("Arc Details")
-    print("-" * 30)
+        print(f"{fp.reference:<10} {fp.value:<20} UUID={fp.uuid}")
 
-    for i, arc in enumerate(geometry.arcs, start=1):
-
-        print(f"Arc #{i}")
-        print(
-            f"Center         : ({arc.center.x:.2f}, {arc.center.y:.2f}) mm"
-        )
-        print(f"Radius         : {arc.radius:.2f} mm")
-        print(f"Start Angle    : {arc.start_angle:.2f}°")
-        print(f"End Angle      : {arc.end_angle:.2f}°")
-        print()
+print()
 
 # ----------------------------------------------------------
+# UUID Validation
+# ----------------------------------------------------------
+
+print("UUID Validation")
+print("-" * 30)
+
+missing_uuid = [fp.reference for fp in footprints if not fp.uuid]
+
+if not missing_uuid:
+
+    print("PASS : All footprints have UUIDs.")
+
+else:
+
+    print("FAIL : Missing UUIDs")
+
+    for ref in missing_uuid:
+        print(ref)
+
+print()
 
 separator()
 print("STATUS : READY")
