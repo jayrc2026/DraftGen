@@ -3,6 +3,56 @@ DraftGen Footprint Data Model
 """
 
 
+class PadData:
+
+    def __init__(self):
+
+        # --------------------------------------------------
+        # Identification
+        # --------------------------------------------------
+
+        self.number = ""
+        self.name = ""
+        self.uuid = ""
+
+        # --------------------------------------------------
+        # Electrical Information
+        # --------------------------------------------------
+
+        self.net = ""
+        self.pin_function = ""
+        self.pin_type = ""
+
+        # --------------------------------------------------
+        # Placement
+        # --------------------------------------------------
+
+        self.x = 0.0
+        self.y = 0.0
+        self.rotation = 0.0
+
+        # --------------------------------------------------
+        # Physical Information
+        # --------------------------------------------------
+
+        self.width = 0.0
+        self.height = 0.0
+
+        self.drill_x = 0.0
+        self.drill_y = 0.0
+
+        self.shape = ""
+
+        # --------------------------------------------------
+        # Manufacturing
+        # --------------------------------------------------
+
+        self.smd = False
+        self.through_hole = False
+
+        self.layers = []
+
+
 class FootprintData:
 
     def __init__(self):
@@ -79,10 +129,14 @@ class FootprintData:
         self.fields = {}
 
         # --------------------------------------------------
-        # Future Expansion
+        # Pad Information
         # --------------------------------------------------
 
         self.pads = []
+
+        # --------------------------------------------------
+        # Future Expansion
+        # --------------------------------------------------
 
         self.variants = {}
 

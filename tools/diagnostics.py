@@ -194,10 +194,123 @@ for fp in footprints[:10]:
     print("-" * 60)
 
 # ----------------------------------------------------------
-# DNP Validation
+# Pad Extraction Summary
 # ----------------------------------------------------------
 
 print()
+print("Pad Extraction")
+print("-" * 30)
+
+total_pads = 0
+footprints_with_pads = 0
+footprints_without_pads = 0
+
+for fp in footprints:
+
+    total_pads += len(fp.pads)
+
+    if fp.pads:
+        footprints_with_pads += 1
+    else:
+        footprints_without_pads += 1
+
+print(f"Total Pads         : {total_pads}")
+print(f"Footprints w/Pads  : {footprints_with_pads}")
+print(f"No Pad Footprints  : {footprints_without_pads}")
+print()
+
+# ----------------------------------------------------------
+# Sample Pad Data
+# ----------------------------------------------------------
+
+print("Sample Pad Data")
+print("-" * 30)
+
+sample = None
+
+for fp in footprints:
+    if fp.pads:
+        sample = fp
+        break
+
+if sample is None:
+
+    print("No pads extracted.")
+
+else:
+
+    print(f"Reference : {sample.reference}")
+    print(f"Value     : {sample.value}")
+    print()
+
+    for pad in sample.pads[:5]:
+
+        print(f"Pad {pad.number}")
+        print(f"Net        : {pad.net}")
+        print(f"Position   : ({pad.x:.2f}, {pad.y:.2f}) mm")
+        print(f"Size       : {pad.width:.2f} x {pad.height:.2f} mm")
+        print(f"Shape      : {pad.shape}")
+        print(f"SMD        : {pad.smd}")
+        print(f"PTH        : {pad.through_hole}")
+        print(f"Layers     : {', '.join(pad.layers)}")
+        print()
+
+# ----------------------------------------------------------
+# Pad Validation
+# ----------------------------------------------------------
+
+print("Pad Validation")
+print("-" * 30)
+
+missing_numbers = []
+missing_size = []
+missing_layers = []
+pad_count_errors = []
+
+for fp in footprints:
+
+    if len(fp.pads) != fp.pad_count:
+        pad_count_errors.append(fp.reference)
+
+    for pad in fp.pads:
+
+        if pad.number == "":
+            missing_numbers.append((fp.reference, pad))
+
+        if pad.width <= 0 or pad.height <= 0:
+            missing_size.append((fp.reference, pad.number))
+
+        if len(pad.layers) == 0:
+            missing_layers.append((fp.reference, pad.number))
+
+if not missing_numbers:
+    print("PASS : Every pad has a number.")
+else:
+    print(f"FAIL : {len(missing_numbers)} pads missing numbers.")
+
+if not missing_size:
+    print("PASS : Every pad has valid dimensions.")
+else:
+    print(f"FAIL : {len(missing_size)} pads missing size.")
+
+if not missing_layers:
+    print("PASS : Every pad belongs to at least one layer.")
+else:
+    print(f"FAIL : {len(missing_layers)} pads missing layers.")
+
+if not pad_count_errors:
+    print("PASS : Footprint pad counts match extracted pads.")
+else:
+    print("FAIL : Pad count mismatch:")
+    for ref in pad_count_errors:
+        print("   ", ref)
+
+print()
+
+# ----------------------------------------------------------
+# DNP Validation
+# ----------------------------------------------------------
+
 print("DNP Components")
 print("-" * 30)
 
